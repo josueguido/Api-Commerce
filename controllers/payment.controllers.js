@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 
-const stripe = new Stripe('sk_test_51PYHkpKRR7GVsCxLWxo1oDoqyQkPmQmARqthPupG9kApgTykGcY7IAqF5IjXlqjvRWb1VPT0rMryrqYnomjwoP6V001s0lJRAS')
+const stripe = new Stripe('')
 
 export const createSession = async (req, res) => {
   const session = await stripe.checkout.sessions.create({
