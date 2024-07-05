@@ -4,10 +4,12 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { PORT, SECRET_JWT_KEY } from './config.js'
 import { UserRepository } from './user-repository.js'
+import paymentRoutes from './routes/payment.routes.js'
 
 const app = express()
 
 app.set('view engine', 'ejs')
+app.use(paymentRoutes)
 
 const corsOptions = {
   origin: 'http://localhost:5173', // URL del frontend
