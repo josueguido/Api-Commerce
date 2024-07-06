@@ -5,15 +5,16 @@ import cors from 'cors'
 import { PORT, SECRET_JWT_KEY } from './config.js'
 import { UserRepository } from './user-repository.js'
 import paymentRoutes from './routes/payment.routes.js'
-
 const app = express()
 
 app.set('view engine', 'ejs')
 app.use(paymentRoutes)
 
 const corsOptions = {
-  origin: 'http://localhost:5173', // URL del frontend
-  credentials: true // Permite el envío de cookies y encabezados de autorización
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
+  credentials: true // Permitir el envío de cookies
 }
 app.use(cors(corsOptions))
 
@@ -84,6 +85,8 @@ app.get('/proteted', (req, res) => {
   if (!user) return res.status(403).send('Access no authorized')
   res.render('[proteted', user)
 })
+
+app.use('/api/payment', paymentRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)

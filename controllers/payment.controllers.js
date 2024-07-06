@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
+import { STRIPE_PRIVATE_KEY } from '../config.js'
 
-const stripe = new Stripe('')
+const stripe = new Stripe(STRIPE_PRIVATE_KEY)
 
 export const createSession = async (req, res) => {
   const session = await stripe.checkout.sessions.create({
@@ -12,7 +13,7 @@ export const createSession = async (req, res) => {
             description: 'Blue Color'
           },
           currency: 'usd',
-          unit_amount: 20000 // centavos
+          unit_amount: 20000 // cents
         },
         quantity: 2
       },
