@@ -30,8 +30,8 @@ export const createSession = async (req, res) => {
       }
     ],
     mode: 'payment', // payment: one-time payment
-    success_url: 'http://localhost:3000/success',
-    cancel_url: 'http://localhost:3000/cancel'
+    success_url: 'http://localhost:5173/success',
+    cancel_url: 'http://localhost:5173/cancel'
   })
   return res.json(session)
 }

@@ -5,11 +5,11 @@ const router = Router()
 router.post('/create-checkout-session', createSession)
 
 router.get('/success', (req, res) => {
-  res.send('success')
+  res.redirect('http://localhost:5173/success')
 })
 
-router.get('/cancel', (req, res) => {
-  res.send('cancel')
+router.get('/', (req, res) => {
+  res.redirect('http://localhost:5173')
 })
 
 export default router

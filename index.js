@@ -5,10 +5,10 @@ import cors from 'cors'
 import { PORT, SECRET_JWT_KEY } from './config.js'
 import { UserRepository } from './user-repository.js'
 import paymentRoutes from './routes/payment.routes.js'
+
 const app = express()
 
 app.set('view engine', 'ejs')
-app.use(paymentRoutes)
 
 const corsOptions = {
   origin: 'http://localhost:5173',
@@ -16,13 +16,13 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
   credentials: true // Permitir el envío de cookies
 }
-app.use(cors(corsOptions))
 
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
 
 app.use((req, res, next) => {
-  const token = req.cookies.access_token
+  const token = req.cookies['access-token']
   req.session = { user: null }
 
   try {
@@ -44,10 +44,10 @@ app.post('/login', async (req, res) => {
   try {
     const user = await UserRepository.login({ username, password })
     const token = jwt.sign(
-      { id: user._id, username: user.username }
-      , SECRET_JWT_KEY, {
-        expiresIn: '1h'
-      })
+      { id: user._id, username: user.username },
+      SECRET_JWT_KEY,
+      { expiresIn: '1h' }
+    )
 
     res
       .cookie('access-token', token, {
@@ -56,15 +56,15 @@ app.post('/login', async (req, res) => {
         sameSite: 'strict', // Solo se puede acceder desde el mismo dominio
         maxAge: 1000 * 60 * 60 // La Cookie solo tiene un tiempo de validez de una hora
       })
-      .send({ user, token })
+
+    return res.json({ user, token }) // Asegúrate de devolver un JSON válido
   } catch (error) {
-    res.status(401).send(error.message)
+    return res.status(401).json({ message: 'Invalid credentials' }) // Devolver un JSON válido en caso de error
   }
 })
 
 app.post('/signup', async (req, res) => {
   const { username, password } = req.body
-  console.log(req.body)
 
   try {
     const id = await UserRepository.create({ username, password })
@@ -76,14 +76,14 @@ app.post('/signup', async (req, res) => {
 
 app.post('/logout', (req, res) => {
   res
-    .clearCookie('access token')
+    .clearCookie('access-token')
     .send({ message: 'logout successful' })
 })
 
-app.get('/proteted', (req, res) => {
+app.get('/protected', (req, res) => {
   const { user } = req.session
   if (!user) return res.status(403).send('Access no authorized')
-  res.render('[proteted', user)
+  res.render('protected', user)
 })
 
 app.use('/api/payment', paymentRoutes)
