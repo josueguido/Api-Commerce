@@ -5,7 +5,7 @@ const router = Router()
 router.post('/create-checkout-session', createSession)
 
 router.get('/success', (req, res) => {
-  res.redirect('http://localhost:5173/success')
+  res.redirect('http://localhost:5173')
 })
 
 router.get('/', (req, res) => {
