@@ -2,6 +2,7 @@ import DBLocal from 'db-local'
 import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import { SALT_ROUNDS } from './config.js'
+
 const { Schema } = new DBLocal({ path: './db' })
 
 const User = Schema('User', {
@@ -15,14 +16,14 @@ export class UserRepository {
     Validation.username(username)
     Validation.password(password)
 
-    // Asegurarse que el username no exista
-    const user = User.findOne({ username })
-    if (user) throw new Error('username already exists')
+    // Asegurarse de que el username no exista
+    const user = await User.findOne({ username })
+    if (user) throw new Error('Username already exists')
 
     const id = crypto.randomUUID()
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
 
-    User.create({
+    await User.create({
       _id: id,
       username,
       password: hashedPassword
@@ -35,11 +36,11 @@ export class UserRepository {
     Validation.username(username)
     Validation.password(password)
 
-    const user = User.findOne({ username })
-    if (!user) throw new Error('usermane doesn`t exists')
+    const user = await User.findOne({ username })
+    if (!user) throw new Error('Username doesn`t exist')
 
     const isValid = await bcrypt.compare(password, user.password)
-    if (!isValid) throw new Error('password is invalid')
+    if (!isValid) throw new Error('Password is invalid')
 
     const { password: _, ...publicUser } = user
 
@@ -49,12 +50,12 @@ export class UserRepository {
 
 class Validation {
   static username (username) {
-    if (typeof username !== 'string') throw new Error('username must be a string')
-    if (username.length < 3) throw new Error('username must be at least 3 characters long')
+    if (typeof username !== 'string') throw new Error('Username must be a string')
+    if (username.length < 3) throw new Error('Username must be at least 3 characters long')
   }
 
   static password (password) {
-    if (typeof password !== 'string') throw new Error('password must be a string')
-    if (password.length < 6) throw new Error('password must be at least 3 characters long')
+    if (typeof password !== 'string') throw new Error('Password must be a string')
+    if (password.length < 6) throw new Error('Password must be at least 6 characters long')
   }
 }

@@ -11,31 +11,35 @@ const app = express()
 app.set('view engine', 'ejs')
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
-  credentials: true // Permitir el envío de cookies
+  origin: 'https://glam-tech-shop.netlify.app',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }
 
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   const token = req.cookies['access-token']
   req.session = { user: null }
 
   try {
-    const data = jwt.verify(token, SECRET_JWT_KEY)
-    req.session.user = data
-  } catch (error) { }
+    if (token) {
+      const data = jwt.verify(token, SECRET_JWT_KEY)
+      req.session.user = data
+    }
+  } catch (error) {
+    console.error('Token verification failed:', error)
+  }
 
-  next() // Seguir a la siguiente ruta o middleware
+  next()
 })
 
 app.get('/', (req, res) => {
   const { user } = req.session
-  res.render('index', user)
+  res.render('index', user || {})
 })
 
 app.post('/login', async (req, res) => {
@@ -49,40 +53,41 @@ app.post('/login', async (req, res) => {
       { expiresIn: '1h' }
     )
 
-    res
-      .cookie('access-token', token, {
-        httpOnly: true, // La Cookie solo se puede acceder desde el servidor
-        secure: process.env.NODE_ENV === 'production', // La Cookie solo se puede acceder en https
-        sameSite: 'strict', // Solo se puede acceder desde el mismo dominio
-        maxAge: 1000 * 60 * 60 // La Cookie solo tiene un tiempo de validez de una hora
-      })
+    res.cookie('access-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60
+    })
 
-    return res.json({ user, token }) // Asegúrate de devolver un JSON válido
+    return res.json({ user, token })
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid credentials' }) // Devolver un JSON válido en caso de error
+    return res.status(401).json({ message: 'Invalid credentials' })
   }
 })
 
 app.post('/signup', async (req, res) => {
+  console.log('Signup request received:', req.body)
   const { username, password } = req.body
 
   try {
     const id = await UserRepository.create({ username, password })
-    res.send({ id })
+    res.status(201).json({ id })
   } catch (error) {
-    res.status(400).send(error.message)
+    console.error('Signup error:', error)
+    res.status(400).json({ message: error.message })
   }
 })
 
 app.post('/logout', (req, res) => {
   res
     .clearCookie('access-token')
-    .send({ message: 'logout successful' })
+    .json({ message: 'Logout successful' })
 })
 
 app.get('/protected', (req, res) => {
   const { user } = req.session
-  if (!user) return res.status(403).send('Access no authorized')
+  if (!user) return res.status(403).send('Access not authorized')
   res.render('protected', user)
 })
 
