@@ -35,10 +35,11 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use((req, res, next) => {
-  const origin = req.header('Origin')
-  if (ACCEPTED_ORIGIN.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin)
-    res.header('Access-Control-Allow-Methods', 'GET', 'POST', 'PUT', 'DELETE')
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', 'https://glam-tech-shop.netlify.app')
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    return res.status(200).end()
   }
   next()
 })
