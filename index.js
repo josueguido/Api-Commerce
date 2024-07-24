@@ -11,18 +11,29 @@ const app = express()
 app.set('view engine', 'ejs')
 
 const corsOptions = {
-  origin: 'https://glam-tech-shop.netlify.app',
+  origin: (origin, callback) => {
+    if (!origin || ACCEPTED_ORIGIN.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }
 
+const ACCEPTED_ORIGIN = [
+  'https://glam-tech-shop.netlify.app',
+  'http://localhost:5173'
+]
+
 app.use(cors(corsOptions))
 
-// Manejo de preflight antes de las rutas y otros middlewares
 app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200)
+  const origin = req.header('Origin')
+  if (ACCEPTED_ORIGIN.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin)
   }
   next()
 })
