@@ -10,6 +10,11 @@ const app = express()
 
 app.set('view engine', 'ejs')
 
+const ACCEPTED_ORIGIN = [
+  'https://glam-tech-shop.netlify.app',
+  'http://localhost:5173'
+]
+
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || ACCEPTED_ORIGIN.includes(origin)) {
@@ -23,12 +28,11 @@ const corsOptions = {
   credentials: true
 }
 
-const ACCEPTED_ORIGIN = [
-  'https://glam-tech-shop.netlify.app',
-  'http://localhost:5173'
-]
+app.options('*', cors(corsOptions))
 
 app.use(cors(corsOptions))
+app.use(express.json())
+app.use(cookieParser())
 
 app.use((req, res, next) => {
   const origin = req.header('Origin')
@@ -37,9 +41,6 @@ app.use((req, res, next) => {
   }
   next()
 })
-
-app.use(express.json())
-app.use(cookieParser())
 
 app.use(async (req, res, next) => {
   const token = req.cookies['access-token']

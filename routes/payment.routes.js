@@ -5,11 +5,11 @@ const router = Router()
 router.post('/create-checkout-session', createSession)
 
 router.get('/success', (req, res) => {
-  res.redirect('http://localhost:5173')
+  res.redirect('https://glam-tech-shop.netlify.app')
 })
 
 router.get('/', (req, res) => {
-  res.redirect('http://localhost:5173')
+  res.redirect('https://glam-tech-shop.netlify.app')
 })
 
 export default router
