@@ -12,12 +12,21 @@ app.set('view engine', 'ejs')
 
 const corsOptions = {
   origin: 'https://glam-tech-shop.netlify.app',
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }
 
 app.use(cors(corsOptions))
+
+// Manejo de preflight antes de las rutas y otros middlewares
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  next()
+})
+
 app.use(express.json())
 app.use(cookieParser())
 
@@ -74,15 +83,13 @@ app.post('/signup', async (req, res) => {
     const id = await UserRepository.create({ username, password })
     res.status(201).json({ id })
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error('Error de registro:', error)
     res.status(400).json({ message: error.message })
   }
 })
 
 app.post('/logout', (req, res) => {
-  res
-    .clearCookie('access-token')
-    .json({ message: 'Logout successful' })
+  res.clearCookie('access-token').json({ message: 'Logout successful' })
 })
 
 app.get('/protected', (req, res) => {
