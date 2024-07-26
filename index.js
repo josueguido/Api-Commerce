@@ -10,29 +10,39 @@ const app = express()
 
 app.set('view engine', 'ejs')
 
-app.use(cors({
+const ACCEPTED_ORIGIN = [
+  'https://glam-tech-shop.netlify.app',
+  'http://localhost:5173'
+]
+
+const corsOptions = {
   origin: (origin, callback) => {
-    const ACCEPTED_ORIGINS = [
-      'https://glam-tech-shop.netlify.app',
-      'http://localhost:5173'
-    ]
-
-    if (ACCEPTED_ORIGINS.includes(origin)) {
-      return callback(null, true)
+    if (!origin || ACCEPTED_ORIGIN.includes(origin) || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
     }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}
 
-    if (!origin) {
-      return callback(null, true)
-    }
+app.options('', cors(corsOptions))
 
-    return callback(new Error('Not allowed by CORS'))
-  }
-}))
-app.use(cors())
-
+app.use(cors(corsOptions))
 app.use(express.json())
-
 app.use(cookieParser())
+
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', 'https://glam-tech-shop.netlify.app')
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    return res.status(200).end()
+  }
+  next()
+})
 
 app.use(async (req, res, next) => {
   const token = req.cookies['access-token']
